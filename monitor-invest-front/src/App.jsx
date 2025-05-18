@@ -1,8 +1,18 @@
 import { useState } from "react";
-// import { Box } from "@mui/material";
 import { TextField, Box, Typography, Button } from "@mui/material";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 import "./App.css";
+import GraficoResultado from "./components/grafico";
+import DataTable from "./components/dataTable";
 
 function App() {
   const consoleLog = () => {
@@ -14,6 +24,10 @@ function App() {
   const [mesesAplicacao, setMesesAplicacao] = useState();
   const [resultado, setResultado] = useState([]);
 
+  const reiniciarCalculo = () => {
+    setResultado([]);
+  };
+
   const handleEnviarInfos = async () => {
     const response = await fetch("http://localhost:4000/calcular-cdi", {
       method: "POST",
@@ -24,9 +38,9 @@ function App() {
         tempoMeses: mesesAplicacao,
       }),
     });
-  
+
     const resultado = await response.json();
-    setResultado(resultado); 
+    setResultado(resultado);
     setSaldoInicial("");
     setAporteMensal("");
     setMesesAplicacao("");
@@ -34,14 +48,15 @@ function App() {
 
   return (
     <>
-      <Box sx={{ backgroundColor: "#87CEEB", pt: 5 }}>
+      <Box sx={{ backgroundColor: "#87CEEB", pt: 5, pb: 5 }}>
         <Box
           sx={{
             margin: "auto",
             p: 3,
             border: "1px solid #ccc",
             borderRadius: 2,
-            height: "90vh",
+            minHeight: { md: "86vh", xs: "80vh" },
+            height: "auto",
             width: { xs: "80%", sm: "100%", md: "60%" },
             backgroundColor: "#ffffff",
           }}
@@ -54,7 +69,6 @@ function App() {
               backgroundColor: "#ffffff",
             }}
           >
-            {/* <h1 style={{textAlign:'center'}}>Calculadora CDI</h1> */}
             <Typography
               sx={{
                 fontSize: { xs: "30px", md: "40px" },
@@ -65,55 +79,70 @@ function App() {
             >
               Calculadora CDB
             </Typography>
+            {!resultado.length && (
+              <>
+                <TextField
+                  label="Saldo Inicial"
+                  type="number"
+                  variant="outlined"
+                  value={saldoInicial}
+                  onChange={(e) => setSaldoInicial(+e.target.value)}
+                />
+                <TextField
+                  label="Aporte Mensal"
+                  type="number"
+                  variant="outlined"
+                  value={aporteMensal}
+                  onChange={(e) => setAporteMensal(+e.target.value)}
+                />
+                <TextField
+                  label="Meses de Aplicação"
+                  type="number"
+                  variant="outlined"
+                  value={mesesAplicacao}
+                  onChange={(e) => setMesesAplicacao(+e.target.value)}
+                />
+                <Button
+                  sx={{
+                    backgroundColor: "#1976d2",
+                    color: "white",
+                    fontWeight: "bold",
+                    padding: "10px 20px",
+                    borderRadius: "8px",
+                    "&:hover": {
+                      backgroundColor: "#1565c0",
+                    },
+                    width: { xs: "50%", md: "30%" },
+                    margin: "auto",
+                    mt: 2,
+                  }}
+                  onClick={handleEnviarInfos}
+                >
+                  Enviar
+                </Button>
+              </>
+            )}
 
-            <TextField
-              label="Saldo Inicial"
-              type="number"
-              variant="outlined"
-              value={saldoInicial}
-              onChange={(e) => setSaldoInicial(+e.target.value)}
-            />
-            <TextField
-              label="Aporte Mensal"
-              type="number"
-              variant="outlined"
-              value={aporteMensal}
-              onChange={(e) => setAporteMensal(+e.target.value)}
-            />
-            <TextField
-              label="Meses de Aplicação"
-              type="number"
-              variant="outlined"
-              value={mesesAplicacao}
-              onChange={(e) => setMesesAplicacao(+e.target.value)}
-            />
-            <Button
-              sx={{
-                backgroundColor: "#1976d2",
-                color: "white",
-                fontWeight: "bold",
-                padding: "10px 20px",
-                borderRadius: "8px",
-                "&:hover": {
-                  backgroundColor: "#1565c0",
-                },
-                width: { xs: "50%", md: "30%" },
-                margin: "auto",
-                mt: 2,
-              }}
-              onClick={handleEnviarInfos}
-            >
-              Enviar
-            </Button>
             {resultado.length > 0 && (
-              <Box>
-                <Typography variant="h6">Resultado do CDI:</Typography>
-                {resultado.map((item) => (
-                  <Typography key={item.mes}>
-                    Mês {item.mes}: R$ {item.saldo}
+              <>
+                <Button
+                  variant="contained"
+                  sx={{ width: { xs: "50%", md: "30%" }, margin: "auto" }}
+                  onClick={reiniciarCalculo}
+                >
+                  Novo calculo
+                </Button>
+                <Box>
+                  <Typography variant="h6" sx={{ mt: 3, mb: 3 }}>
+                    Linha do tempo:
                   </Typography>
-                ))}
-              </Box>
+                  <GraficoResultado resultado={resultado} />
+                  <Typography variant="h6">Resultado do CDI:</Typography>
+
+                  {resultado.length > 0 && <DataTable resultado={resultado} />}
+                </Box>
+                {resultado.length > 0 && <></>}
+              </>
             )}
           </Box>
         </Box>
