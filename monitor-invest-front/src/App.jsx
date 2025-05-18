@@ -12,6 +12,7 @@ function App() {
   const [saldoInicial, setSaldoInicial] = useState();
   const [aporteMensal, setAporteMensal] = useState();
   const [mesesAplicacao, setMesesAplicacao] = useState();
+  const [resultado, setResultado] = useState([]);
 
   const handleEnviarInfos = async () => {
     const response = await fetch("http://localhost:4000/calcular-cdi", {
@@ -23,14 +24,12 @@ function App() {
         tempoMeses: mesesAplicacao,
       }),
     });
-    let resultado;
-    resultado = await response.json();
+  
+    const resultado = await response.json();
+    setResultado(resultado); 
     setSaldoInicial("");
     setAporteMensal("");
     setMesesAplicacao("");
-  
-
-    console.log("Resposta do servidor:", resultado);
   };
 
   return (
@@ -106,6 +105,16 @@ function App() {
             >
               Enviar
             </Button>
+            {resultado.length > 0 && (
+              <Box>
+                <Typography variant="h6">Resultado do CDI:</Typography>
+                {resultado.map((item) => (
+                  <Typography key={item.mes}>
+                    Mês {item.mes}: R$ {item.saldo}
+                  </Typography>
+                ))}
+              </Box>
+            )}
           </Box>
         </Box>
       </Box>
