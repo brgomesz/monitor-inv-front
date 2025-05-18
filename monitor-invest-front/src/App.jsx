@@ -13,12 +13,24 @@ function App() {
   const [aporteMensal, setAporteMensal] = useState();
   const [mesesAplicacao, setMesesAplicacao] = useState();
 
-  const handleEnviarInfos = () => {
-    console.log({
-      saldoInicial,
-      aporteMensal,
-      mesesAplicacao,
+  const handleEnviarInfos = async () => {
+    const response = await fetch("http://localhost:4000/calcular-cdi", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        saldoInicial,
+        aporteMensal,
+        tempoMeses: mesesAplicacao,
+      }),
     });
+    let resultado;
+    resultado = await response.json();
+    setSaldoInicial("");
+    setAporteMensal("");
+    setMesesAplicacao("");
+  
+
+    console.log("Resposta do servidor:", resultado);
   };
 
   return (
@@ -59,18 +71,21 @@ function App() {
               label="Saldo Inicial"
               type="number"
               variant="outlined"
+              value={saldoInicial}
               onChange={(e) => setSaldoInicial(+e.target.value)}
             />
             <TextField
               label="Aporte Mensal"
               type="number"
               variant="outlined"
+              value={aporteMensal}
               onChange={(e) => setAporteMensal(+e.target.value)}
             />
             <TextField
               label="Meses de Aplicação"
               type="number"
               variant="outlined"
+              value={mesesAplicacao}
               onChange={(e) => setMesesAplicacao(+e.target.value)}
             />
             <Button
@@ -99,4 +114,3 @@ function App() {
 }
 
 export default App;
-
